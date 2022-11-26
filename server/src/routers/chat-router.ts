@@ -1,20 +1,25 @@
 import { Message, Session } from "@prisma/client";
 import { observable } from "@trpc/server/observable";
-import EventEmitter from "events";
 import { z } from "zod";
+import { ChatPubSubMemoryAdapter } from "../chat-pub-sub-memory-adapter";
 import { db } from "../db";
 import { authenticatedProcedure, publicProcedure, t } from "../trpc";
 
-type MessageWithSession = Message & { sender: Session };
+export type MessageWithSession = Message & { sender: Session };
 
-declare interface MyEventEmitter {
-  on(event: string, listener: (message: MessageWithSession) => void): this;
-  off(event: string, listener: (message: MessageWithSession) => void): this;
-  emit(event: string, message: MessageWithSession): boolean;
+export interface ChatPubSubPort {
+  publishMessage(chatId: string, message: MessageWithSession): Promise<void>;
+  subscribeToChat(
+    chatId: string,
+    listener: (newMessage: MessageWithSession) => void
+  ): Promise<void>;
+  unsubscribeToChat(
+    chatId: string,
+    listener: (newMessage: MessageWithSession) => void
+  ): Promise<void>;
 }
-class MyEventEmitter extends EventEmitter {}
 
-const emitter = new MyEventEmitter();
+const chatPubSub = new ChatPubSubMemoryAdapter();
 
 export const chatRouter = t.router({
   getChat: authenticatedProcedure
@@ -55,7 +60,7 @@ export const chatRouter = t.router({
         include: { sender: true },
       });
 
-      emitter.emit(chatId, createdMessage);
+      await chatPubSub.publishMessage(chatId, createdMessage);
 
       return createdMessage;
     }),
@@ -66,10 +71,8 @@ export const chatRouter = t.router({
         const emitNext = (message: MessageWithSession) => {
           emit.next(message);
         };
-        emitter.on(input.chatId, emitNext);
-        return () => {
-          emitter.off(input.chatId, emitNext);
-        };
+        chatPubSub.subscribeToChat(input.chatId, emitNext);
+        return () => chatPubSub.unsubscribeToChat(input.chatId, emitNext);
       });
     }),
 });
