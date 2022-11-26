@@ -1,9 +1,10 @@
 import { db } from "../db";
+import { generateName } from "../name-generator";
 import { publicProcedure, t } from "../trpc";
 
 export const sessionRouter = t.router({
   createSession: publicProcedure.mutation(async ({ ctx }) => {
-    const name = "beautiful-tupolev" + Date.now().valueOf();
+    const name = generateName();
 
     const session = await db.session.create({ data: { name } });
 
