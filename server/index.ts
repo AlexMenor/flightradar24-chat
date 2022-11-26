@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import fastify from "fastify";
 import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
 import { appRouter, createContext } from "./router";
@@ -7,7 +9,7 @@ import ws from "@fastify/websocket";
 const server = fastify({ maxParamLength: 500 });
 
 server.register(cookie, {
-  secret: "my-secret",
+  secret: process.env.COOKIE_SECRET,
 });
 
 server.register(ws);
@@ -24,7 +26,7 @@ server.register(fastifyTRPCPlugin, {
   },
 });
 
-server.listen({ port: 8080 }, (err, address) => {
+server.listen({ port: parseInt(process.env.PORT) }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
