@@ -40,10 +40,10 @@ export default function Popup() {
   }
 
   const flightDetails = url && getFlightDetailsFromUrl(url);
-
+  console.log(import.meta.env);
   const [queryClient] = useState(() => new QueryClient());
   const [wsClient] = useState(() =>
-    createWSClient({ url: "ws://localhost:8080/trpc" })
+    createWSClient({ url: import.meta.env.VITE_WS_ENDPOINT })
   );
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -54,7 +54,7 @@ export default function Popup() {
           },
           true: wsLink({ client: wsClient }),
           false: httpBatchLink({
-            url: "http://localhost:8080/trpc",
+            url: import.meta.env.VITE_HTTP_ENDPOINT,
           }),
         }),
       ],
