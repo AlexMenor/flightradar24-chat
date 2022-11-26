@@ -5,6 +5,7 @@ import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
 import { appRouter, createContext } from "./router";
 import cookie from "@fastify/cookie";
 import ws from "@fastify/websocket";
+import { TRPCError } from "@trpc/server";
 
 const server = fastify({ maxParamLength: 500 });
 
@@ -20,8 +21,12 @@ server.register(fastifyTRPCPlugin, {
   trpcOptions: {
     router: appRouter,
     createContext: createContext,
-    onError: ({ error }: { error: any }) => {
-      console.error("Unhandled error", error);
+    onError: ({ error }: { error: TRPCError }) => {
+      if (error.code === "INTERNAL_SERVER_ERROR") {
+        console.error("Unhandled error", error);
+      } else {
+        console.log("onError", error);
+      }
     },
   },
 });
@@ -31,5 +36,5 @@ server.listen({ port: parseInt(process.env.PORT) }, (err, address) => {
     console.error(err);
     process.exit(1);
   }
-  console.log(`Server listening at ${address}`);
+  console.log(`✈️  Server listening at ${address} ✈️`);
 });
