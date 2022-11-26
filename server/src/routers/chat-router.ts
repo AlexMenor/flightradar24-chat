@@ -31,13 +31,14 @@ export const chatRouter = t.router({
       })
     )
     .query(async ({ input }) => {
-      const { take, cursor } = input;
+      const { take, cursor, chatId } = input;
 
       const messages = await db.message.findMany({
         cursor: cursor !== undefined ? { id: cursor } : undefined,
         orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         take: -take - 1,
         include: { sender: true },
+        where: { chatId },
       });
 
       const first = messages.length === take + 1 ? messages.shift() : undefined;
