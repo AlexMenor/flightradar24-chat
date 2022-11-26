@@ -2,10 +2,11 @@ import "dotenv/config";
 
 import fastify from "fastify";
 import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify";
-import { appRouter, createContext } from "./router";
+import { appRouter } from "./routers/app-router";
 import cookie from "@fastify/cookie";
 import ws from "@fastify/websocket";
 import { TRPCError } from "@trpc/server";
+import { createContext } from "./trpc";
 
 const server = fastify({ maxParamLength: 500 });
 
