@@ -11,18 +11,12 @@ export function Chat({
   chatId: string;
   flightName: string;
 }) {
-  const createSession = trpc.createSession.useMutation();
+  const session = trpc.getOrCreateSession.useQuery();
   const chat = trpc.getChat.useInfiniteQuery(
     { take: 30, chatId },
     {
-      retry: (n, error) => n < 3 && error.data?.code !== "UNAUTHORIZED",
       getPreviousPageParam: (lastPage) => lastPage.nextCursor,
-      onError: async (err) => {
-        if (err.data?.code === "UNAUTHORIZED") {
-          await createSession.mutateAsync();
-          chat.refetch();
-        }
-      },
+      enabled: session.isSuccess,
     }
   );
   const [currentMsg, setCurrentMsg] = useState("");
@@ -42,16 +36,7 @@ export function Chat({
     }
   );
 
-  if (chat.error?.data?.code === "UNAUTHORIZED") {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="flex items-center flex-col text-fr-orange">
-          <AirplaneIcon className="h-10 w-10" />
-          <p className="text-xl">Creating a new username</p>
-        </div>
-      </div>
-    );
-  } else if (chat.isLoading) {
+  if (chat.isLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="flex items-center flex-col text-fr-orange">
@@ -83,9 +68,16 @@ export function Chat({
   }
   return (
     <div className="h-full flex flex-col px-3 p-3">
-      <h1 className="text-fr-orange text-xl pb-3 font-semibold">
-        {flightName}
-      </h1>
+      <div className="flex justify-between items-center pb-3">
+        <h1 className="text-fr-orange text-xl font-semibold">{flightName}</h1>
+
+        {session.data && (
+          <p className="text-fr-light/80">
+            Logged in as{" "}
+            <span className="font-semibold">{session.data.name}</span>
+          </p>
+        )}
+      </div>
       <Scroller
         messages={allMessages}
         fetchPrevPage={chat.fetchPreviousPage}
