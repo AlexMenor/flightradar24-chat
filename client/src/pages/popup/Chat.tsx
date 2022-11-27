@@ -40,7 +40,7 @@ export function Chat({
     return (
       <div className="h-full flex items-center justify-center">
         <div className="flex items-center flex-col text-fr-orange">
-          <AirplaneIcon className="h-10 w-10" />
+          <AirplaneIcon className="h-10 w-10 animate-bounce" />
           <p className="text-xl">Loading chat</p>
         </div>
       </div>
