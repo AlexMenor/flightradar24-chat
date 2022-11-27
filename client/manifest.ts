@@ -2,9 +2,10 @@ import packageJson from "./package.json";
 
 const manifest: chrome.runtime.ManifestV3 = {
   manifest_version: 3,
-  name: packageJson.name,
+  name: "Flightradar24 chat",
   version: packageJson.version,
-  description: packageJson.description,
+  description:
+    "An extension that allows you to chat with other people following a flight",
   action: {
     default_popup: "src/pages/popup/index.html",
     default_icon: "icon-34.png",
