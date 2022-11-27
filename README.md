@@ -5,7 +5,7 @@ Every day, thousands of aviation enthusiasts follow flights in [flightradar24](h
 This project attempts to fill this gap with a chrome extension.
 
 <p align="center">
-  <img width="960" height="608" src="demo.gif">
+  <img width="709" height="451" src="demo.gif">
 </p>
 
 ## How it works
